@@ -1,0 +1,10 @@
+{
+  "name": "tarima-juice",
+  "version": "0.1.0",
+  "main": "index.js",
+  "author": "Alvaro Cabrera <pateketrueke@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "juice": "^4.0.2"
+  }
+}
