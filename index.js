@@ -3,7 +3,7 @@ var path = require('path');
 var juice;
 
 module.exports = function () {
-  var options = this.util.extend({}, this.opts.pluginOptions.juice || {});
+  var options = this.opts.pluginOptions.juice || {};
 
   var _public = path.relative(this.opts.cwd, this.opts.public);
 
