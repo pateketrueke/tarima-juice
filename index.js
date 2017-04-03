@@ -18,8 +18,8 @@ function makeJuice(options) {
       juice = juice || require('juice');
 
       juice.juiceResources(params.source, {
-        removeStyleTags: !options.debug,
-        applyStyleTags: !options.debug,
+        removeStyleTags: !options.debug && options.styles !== false,
+        applyStyleTags: !options.debug && options.styles !== false,
         webResources: {
           relativeTo: options.cwd,
           scripts: typeof options.scripts === 'undefined' ? true : options.scripts,
@@ -38,13 +38,12 @@ function makeJuice(options) {
 }
 
 module.exports = function () {
-  if (!(this.opts.server || this.opts.watch)) {
-    var options = this.util.extend({}, this.opts.pluginOptions.juice || {});
+  var options = this.util.extend({}, this.opts.pluginOptions['tarima-juice']
+    || this.opts.pluginOptions.juice || {});
 
-    options.debug = this.opts.bundleOptions.compileDebug;
-    options.cwd = path.relative(this.opts.cwd, this.opts.public);
+  options.debug = this.opts.bundleOptions.compileDebug;
+  options.cwd = path.relative(this.opts.cwd, this.opts.public);
 
-    this.opts.bundleOptions.postRender = this.opts.bundleOptions.postRender || [];
-    this.opts.bundleOptions.postRender.push(makeJuice(options));
-  }
+  this.opts.bundleOptions.postRender = this.opts.bundleOptions.postRender || [];
+  this.opts.bundleOptions.postRender.push(makeJuice(options));
 };
