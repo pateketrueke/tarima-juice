@@ -4,22 +4,22 @@ var juice;
 
 function makeJuice(options) {
   return function (params, done) {
-    if (params.isTemplate && params.extension === 'html') {
-      if (options.skip && params.source.indexOf(options.skip) > -1) {
+    if (params.dest.indexOf('.html') > -1) {
+      if (options.skip && params.output.indexOf(options.skip) > -1) {
         done();
         return;
       }
 
-      if (options.only && params.source.indexOf(options.only) === -1) {
+      if (options.only && params.output.indexOf(options.only) === -1) {
         done();
         return;
       }
 
       juice = juice || require('juice');
 
-      juice.juiceResources(params.source, {
-        removeStyleTags: !options.debug && options.styles !== false,
-        applyStyleTags: !options.debug && options.styles !== false,
+      juice.juiceResources(params.output, {
+        removeStyleTags: !options.debug,
+        applyStyleTags: !options.debug,
         webResources: {
           relativeTo: options.cwd,
           scripts: typeof options.scripts === 'undefined' ? true : options.scripts,
@@ -28,7 +28,7 @@ function makeJuice(options) {
           svgs: typeof options.svgs === 'undefined' ? true : options.svgs
         }
       }, function (err, html) {
-        params.source = html;
+        params.output = html;
         done(err);
       });
     } else {
@@ -38,12 +38,22 @@ function makeJuice(options) {
 }
 
 module.exports = function () {
-  var options = this.util.extend({}, this.opts.pluginOptions['tarima-juice']
-    || this.opts.pluginOptions.juice || {});
+  var options = this.util.extend({}, this.opts.pluginOptions.juice || {});
 
   options.debug = this.opts.bundleOptions.compileDebug;
   options.cwd = path.relative(this.opts.cwd, this.opts.public);
 
-  this.opts.bundleOptions.postRender = this.opts.bundleOptions.postRender || [];
-  this.opts.bundleOptions.postRender.push(makeJuice(options));
+  var compiler = makeJuice(options);
+
+  this.on('write', function (view) {
+    return new Promise(function (resolve, reject) {
+      compiler(view, function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  });
 };
